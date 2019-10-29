@@ -1,0 +1,67 @@
+---
+title: "index"
+author: "Bret McNamee"
+date: "10/24/2019"
+output: html_document
+---
+
+
+```{r}
+suppressMessages(library("rvest"))
+suppressMessages(library("tidyr"))
+
+```
+
+```{r}
+##Reading in the URLs and then reading in the contents of those URLs
+getSchedInfo <- function(url) {
+
+sched <- read_html(url)
+
+##creating lists from the URLs containing the data in each column, they are split up by alternating rows
+
+
+classes <- sched %>% html_nodes("tr.classrow")
+classes_2 <- sched %>% html_nodes("tr.classrowalt")
+
+##titles
+
+title <- classes %>% html_nodes("td.title") %>% html_text()
+title_2 <- classes_2 %>% html_nodes("td.title") %>% html_text()
+
+sub <- classes %>% html_nodes("td.subj") %>% html_text()
+sub_2 <- classes_2 %>% html_nodes("td.subj") %>% html_text()
+
+cat_num <- classes %>% html_nodes("td.cat_num") %>% html_text()
+cat_num_2 <- classes_2 %>% html_nodes("td.cat_num") %>% html_text()
+
+sect <- classes %>% html_nodes("td.sect") %>% html_text()
+sect_2 <- classes_2 %>% html_nodes("td.sect") %>% html_text()
+
+instructor <- classes %>% html_nodes("td.Instructor") %>% html_text()
+instructor_2 <- classes_2 %>% html_nodes("td.Instructor") %>% html_text()
+
+enrtot <- classes %>% html_nodes("td.enrtot") %>% html_text()  %>% as.integer()
+enrtot_2 <- classes_2 %>% html_nodes("td.enrtot") %>% html_text()  %>% as.integer()
+
+
+##This block of code will create a tibble that contains all of this data.
+
+classInfo <- tibble(Subj = c(sub, sub_2),
+        Cat_num = c(cat_num, cat_num_2),
+        Sect = c(sect, sect_2),
+        Title = c(title, title_2),
+        Instructor = c(instructor, instructor_2),
+        Enrollment = c(enrtot, enrtot_2))
+return(classInfo) }
+
+
+```
+
+Here we will call the function to see if it works for multiple URLs
+
+```{r}
+
+spr19 <- getSchedInfo("http://ems.csuchico.edu/APSS/schedule/spr2019/CSCI.shtml")
+
+```
